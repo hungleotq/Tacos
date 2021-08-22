@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>
+				%d{HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="root" level="debug"/>
+	
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+	</root>
+	
+	<property scope="context" name="Ingredient_LOG" value="src/main/resources/logs/ingredient"/>
+	
+	<appender name="Ingredient" class="ch.qos.logback.core.rolling.RollingFileAppender">
+               <file>${Ingredient_LOG}/debug.log</file>
+               <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                       <Pattern>
+                               %d{yyyy-MM-dd HH:mm:ss} - %msg%n
+                       </Pattern>
+               </encoder>
+               <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                       <!-- rollover daily -->
+                       <fileNamePattern>${Ingredient_LOG}/archived/debug.%d{yyyy-MM-dd}.%i.zip
+                       </fileNamePattern>
+                       <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                               <maxFileSize>250MB</maxFileSize>
+                       </timeBasedFileNamingAndTriggeringPolicy>
+               </rollingPolicy>;''                        
+       </appender>
+       	<logger name="tacos.web.IngredientController" level="debug">
+             <appender-ref ref="Ingredient"/>
+        </logger>
+        <logger name="tacos.repository.IngredientJDBCTemplateRepository" level="debug">
+             <appender-ref ref="Ingredient"/>
+        </logger>
+        
+        
+        
+        <property scope="context" name="TACO_LOG" value="src/main/resources/logs/taco"/>
+	
+		<appender name="TACO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+               <file>${TACO_LOG}/debug.log</file>
+               <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                       <Pattern>
+                               %d{yyyy-MM-dd HH:mm:ss} - %msg%n
+                       </Pattern>
+               </encoder>
+               <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                       <!-- rollover daily -->
+                       <fileNamePattern>${TACO_LOG}/archived/debug.%d{yyyy-MM-dd}.%i.zip
+                       </fileNamePattern>
+                       <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                               <maxFileSize>250MB</maxFileSize>
+                       </timeBasedFileNamingAndTriggeringPolicy>
+               </rollingPolicy>;''                        
+       </appender>
+       	<logger name="tacos.web.DesignController" level="info">
+             <appender-ref ref="TACO"/>
+        </logger>
+        <logger name="tacos.repository.TacoSpringJDBCRepository" level="info">
+             <appender-ref ref="TACO"/>
+        </logger>
+</configuration>

@@ -9,7 +9,8 @@ div.ingredient-group:nth-child(even) {
 }
 
 div.ingredient-group {
-	width: 50%;
+	width: 100%;
+	padding: 5px 5px 10px 0px;
 }
 
 .grid:after {
@@ -26,4 +27,23 @@ div.ingredient-group {
 
 span.validationError {
 	color: red;
+}
+
+body {
+	padding-left: 2px;
+	padding-right: 2px;
+	min-height: 100%;
+	overflow-x: hidden;
+}
+
+.header {
+/* 	margin-left: 15px; */
+}
+
+.footer {
+	float: right;
+    font-weight: bold;
+    font-size: 18px;
+    font-family: fantasy;
+    clear: both;
 }

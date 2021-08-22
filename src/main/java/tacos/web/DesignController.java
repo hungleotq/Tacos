@@ -1,6 +1,6 @@
 package tacos.web;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
@@ -14,60 +14,71 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import lombok.extern.slf4j.Slf4j;
 import tacos.dto.Ingredient;
+import tacos.dto.Ingredient.Type;
+import tacos.dto.Order;
 import tacos.dto.Taco;
 import tacos.repository.IngredientRepository;
-import tacos.dto.Ingredient.Type;
+import tacos.repository.TacoRepository;
 
 @Slf4j
 @Controller
 @RequestMapping("/design")
+@SessionAttributes("order")
 public class DesignController {
 
-	@Autowired
 	private IngredientRepository ingredientRepository;
+
+	private TacoRepository tacoRepository;
+
+	@Autowired
+	public DesignController(IngredientRepository ingredientRepository,
+							TacoRepository tacoRepository) {
+		this.ingredientRepository = ingredientRepository;
+		this.tacoRepository = tacoRepository;
+	}
 	
-//	@ModelAttribute
-//	public void addIngredientsToModel(Model model) {
-//		List<Ingredient> ingredients = Arrays.asList(
-//		  new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
-//		  new Ingredient("COTO", "Corn Tortilla", Type.WRAP),
-//		  new Ingredient("GRBF", "Ground Beef", Type.PROTEIN),
-//		  new Ingredient("CARN", "Carnitas", Type.PROTEIN),
-//		  new Ingredient("TMTO", "Diced Tomatoes", Type.VEGGIES),
-//		  new Ingredient("LETC", "Lettuce", Type.VEGGIES),
-//		  new Ingredient("CHED", "Cheddar", Type.CHEESE),
-//		  new Ingredient("JACK", "Monterrey Jack", Type.CHEESE),
-//		  new Ingredient("SLSA", "Salsa", Type.SAUCE),
-//		  new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
-//		);
-		
-//	}
+	@ModelAttribute(name = "order")
+	public Order order() {
+		return new Order();
+	}
+	
+	@ModelAttribute(name = "taco")
+	public Taco taco() {
+		return new  Taco();
+	}
 	
 	@GetMapping
 	public String showDesignForm(Model model) {
+		prepareForDesign(model);
+		return "design";
+	}
+	
+	@PostMapping
+	public String processDesign(@Valid @ModelAttribute("taco") Taco taco, Errors error, 
+			Model model, @ModelAttribute Order order) {
+		if(error.hasErrors()) {
+			log.info("Validation failed");
+			prepareForDesign(model);
+			return "design";
+		} 
+		taco = (Taco) model.getAttribute("taco"); //???? model mapping from request ???
+		Taco saved = tacoRepository.save(taco);
+		order.addTaco(saved); 
 		
+		log.info("Processing design: " + taco);
+		return "redirect:/order/current";
+	}
+	
+	private void prepareForDesign(Model model) {
 		List<Ingredient> ingredients = ingredientRepository.findAll();
 		Type[] types = Ingredient.Type.values();
 		for (Type type : types) {
 			model.addAttribute(type.toString().toLowerCase(), 
 					ingredients.stream().filter(c -> c.getType().equals(type)).collect(Collectors.toList()));
 		}
-		model.addAttribute("design", new Taco());
-		return "design";
 	}
-	
-	@PostMapping
-	public String processDesign(@Valid @ModelAttribute("design") Taco design, Errors error, Model model) {
-		if(error.hasErrors()) {
-			log.info("Validation failed");
-			return "design";
-		} 
-		
-		log.info("Processing design: " + design);
-		return "redirect:/order/current";
-	}
-	
 }
